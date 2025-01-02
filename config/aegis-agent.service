@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/aegis-agent
+ExecStart=/usr/local/bin/aegis_pam_agent
 Restart=always
 User=root
 

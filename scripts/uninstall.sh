@@ -4,8 +4,8 @@ set -e
 echo "Uninstalling Aegis PAM module..."
 
 # Zatrzymanie agenta
-sudo systemctl stop aegis-agent
-sudo systemctl disable aegis-agent
+sudo systemctl stop aegis_pam_agent
+sudo systemctl disable aegis_pam_agent
 
 # Usunięcie jednostki systemd
 sudo rm -f /etc/systemd/system/aegis-agent.service
