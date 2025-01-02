@@ -1,0 +1,12 @@
+[Unit]
+Description=Aegis PAM Authentication Agent
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/aegis-agent
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target 
