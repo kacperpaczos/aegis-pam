@@ -7,7 +7,12 @@ project('aegis-pam', 'cpp',
 pam_dep = dependency('pam')
 thread_dep = dependency('threads')
 
-# Konfiguracja modułu PAM
+# Konfiguracja trybu dev
+if get_option('buildtype') == 'debug'
+  add_project_arguments('-DDEV_BUILD', language : 'cpp')
+endif
+
+# Moduł PAM
 pam_module = shared_library('pam_aegis',
   'src/pam_aegis.cpp',
   name_prefix : '',
@@ -16,7 +21,7 @@ pam_module = shared_library('pam_aegis',
   install_dir : '/lib/security'
 )
 
-# Agent Aegis PAM
+# Agent
 aegis_pam_agent = executable('aegis_pam_agent',
   'src/aegis_pam_agent.cpp',
   dependencies : [thread_dep],
