@@ -1,10 +1,13 @@
 project('aegis-pam', 'cpp',
   version : '0.1.0',
-  default_options : ['cpp_std=c++17']
+  default_options : [
+    'warning_level=3',
+    'cpp_std=c++20'
+  ]
 )
 
 # Zależności
-pam_dep = dependency('pam')
+pam_dep = meson.get_compiler('cpp').find_library('pam')
 thread_dep = dependency('threads')
 
 # Konfiguracja trybu dev
@@ -14,7 +17,7 @@ endif
 
 # Moduł PAM
 pam_module = shared_library('pam_aegis',
-  'src/pam_aegis.cpp',
+  'src/aegis_pam_module.cpp',
   name_prefix : '',
   dependencies : [pam_dep],
   install : true,
