@@ -13,7 +13,7 @@ PAM serves as a standard interface mediating between applications and authentica
 ## Key Features
 
 - Unified authentication mechanism
-- Compatibility with existing PAM infrastructure
+- Compatibility with existing PAM infrastructure 
 - Flexible security policy configuration
 - Support for various authorization methods
 - Development mode with enhanced logging
@@ -27,18 +27,24 @@ The system consists of three main components:
    - Installed in the PAM system
    - Intercepts authentication requests
    - Lightweight and fast processing
-   - Communicates with the agent via socket
+   - Communicates with the agent via Unix socket
+   - Handles basic authentication flow
+   - Logs authentication attempts
+   - Supports development mode with detailed logging
 
 2. **Aegis Agent** (`aegis_pam_agent`)
-   - Background service
+   - Background service managed by systemd
    - Handles complex authentication logic
    - Manages security policies
    - Provides logging and monitoring
    - Automatic restart capability
+   - Processes authentication requests from PAM module
+   - Maintains persistent state
+   - Manages user sessions
 
 3. **Configuration Layer**
-   - PAM stack configuration
-   - Agent configuration
+   - PAM stack configuration in /etc/pam.d/
+   - Agent configuration in /etc/aegis/
    - Security policy definitions
    - Development mode settings
 
@@ -58,6 +64,55 @@ The module activates during:
 - systemd for service management
 - C++20 compatible compiler
 - meson build system
+
+## Installation & Scripts
+
+### Installation Modes
+
+1. **Development Mode** (`./install.sh dev`)
+   - Enables debug logging
+   - Opens emergency root terminal
+   - Installs in debug configuration
+   - Creates log file at /tmp/aegis_pam_dev.log
+
+2. **Sudo Mode** (`./install.sh sudo`)
+   - Installs for sudo authentication only
+   - Configures PAM stack for sudo
+   - Starts agent service
+   - Production configuration
+
+3. **Global Mode** (`./install.sh global`)
+   - System-wide installation
+   - Modifies common-auth
+   - Full PAM integration
+   - Production configuration
+
+### Key Scripts
+
+- `install.sh` - Main installation script
+- `uninstall.sh` - Removes module and restores configuration
+- `tests/run_tests.sh` - Executes test suite
+- `scripts/backup_pam.sh` - Creates PAM config backup
+
+## Module Operation
+
+### PAM Module Flow
+
+1. Authentication request received
+2. Username obtained from PAM
+3. Request logged (if in dev mode)
+4. Communication with agent via socket
+5. Response processing
+6. Authentication result returned
+
+### Agent Operation
+
+1. Starts as systemd service
+2. Listens on Unix socket
+3. Processes authentication requests
+4. Manages user sessions
+5. Handles security policies
+6. Maintains audit log
 
 ## Development Mode
 

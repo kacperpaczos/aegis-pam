@@ -6,16 +6,25 @@ project('aegis-pam', 'cpp',
   ]
 )
 
-# Zależności
+# Dependencies
 pam_dep = meson.get_compiler('cpp').find_library('pam')
 thread_dep = dependency('threads')
 
-# Konfiguracja trybu dev
+# Configuration data
+conf_data = configuration_data()
+conf_data.set_quoted('VERSION', meson.project_version())
 if get_option('buildtype') == 'debug'
-  add_project_arguments('-DDEV_BUILD', language : 'cpp')
+    conf_data.set('DEV_BUILD', true)
+else
+    conf_data.set('DEV_BUILD', false)
 endif
 
-# Moduł PAM
+configure_file(
+    output : 'config.h',
+    configuration : conf_data
+)
+
+# PAM module
 pam_module = shared_library('pam_aegis',
   'src/aegis_pam_module.cpp',
   name_prefix : '',
@@ -32,7 +41,7 @@ aegis_pam_agent = executable('aegis_pam_agent',
   install_dir : '/usr/local/bin'
 )
 
-# Instalacja plików konfiguracyjnych
-install_data('config/aegis_pam_agent.conf',
+# Install config files
+install_data(['config/aegis_pam_agent.conf', 'config/aegis_pam_module.conf'],
   install_dir : '/etc/aegis'
 )
