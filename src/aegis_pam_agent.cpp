@@ -122,10 +122,10 @@ public:
             
             logger.log("Processing auth event: " + event + " for user: " + username);
             
-            if (HttpClient::sendPamRecord(username, event)) {
-                logger.log("Successfully sent PAM record to API");
+            if (HttpClient::sendPamRecord(username, event, config.api_endpoint)) {
+                logger.log("Successfully sent PAM record to API: " + config.api_endpoint);
             } else {
-                logger.error("Failed to send PAM record to API");
+                logger.error("Failed to send PAM record to API: " + config.api_endpoint);
             }
         } else {
             logger.error("Invalid message format received: " + message);

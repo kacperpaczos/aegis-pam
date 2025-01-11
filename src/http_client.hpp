@@ -5,13 +5,12 @@
 #include <Poco/URI.h>
 #include <string>
 #include <syslog.h>
-#include "config.h"
 
 class HttpClient {
 public:
-    static bool sendPamRecord(const std::string& username, const std::string& event) {
+    static bool sendPamRecord(const std::string& username, const std::string& event, const std::string& endpoint) {
         try {
-            Poco::URI uri(API_ENDPOINT);
+            Poco::URI uri(endpoint);
             Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
             
             Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, 
