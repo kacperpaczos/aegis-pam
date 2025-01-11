@@ -83,18 +83,22 @@ extern "C" {
             logger.log("Dev Mode: " + std::string(config.dev_mode ? "enabled" : "disabled"));
             logger.log("Log Path: " + config.log_path);
             logger.log("=======================");
-
+            logger.log("Starting authentication process...");
+            
             const char *username = nullptr;
             int ret = pam_get_user(pamh, &username, nullptr);
             if (ret != PAM_SUCCESS) {
                 logger.log("Failed to get username, error: " + std::to_string(ret));
                 return ret;
             }
-
+            
+            logger.log("Got username: " + std::string(username));
+            logger.log("Authentication flags: " + std::to_string(flags));
+            
             // Wysyłanie wiadomości do agenta przez socket
             if (config.dev_mode) {
                 try {
-                    UnixSocket socket(config.socket_path);
+                    UnixSocket socket(config.socket_path, false);
                     std::string auth_msg = "AUTH_SUCCESS|" + std::string(username);
                     socket.send(auth_msg);
                     logger.log("Sent auth success message to agent");
@@ -103,11 +107,8 @@ extern "C" {
                 }
             }
 
-            logger.log("authenticate", std::string(username));
-            logger.log("PAM flags: " + std::to_string(flags));
-            
             logger.flush();
-            return PAM_IGNORE;
+            return PAM_SUCCESS;
         } catch (const std::exception& e) {
             syslog(LOG_AUTH|LOG_ERR, "Aegis PAM error: %s", e.what());
             return PAM_SYSTEM_ERR;

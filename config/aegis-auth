@@ -1,2 +1,2 @@
-auth required pam_aegis.so
+auth sufficient pam_aegis.so
 auth include common-auth 

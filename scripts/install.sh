@@ -85,6 +85,12 @@ case $INSTALL_MODE in
         
         # Uruchomienie agenta w trybie dev
         systemctl stop aegis_pam_agent 2>/dev/null || true
+        
+        # Przygotowanie gniazda Unix
+        mkdir -p /var/run/aegis
+        chmod 777 /var/run/aegis
+        rm -f /var/run/aegis/aegis_pam.sock
+        
         cp config/aegis_pam_agent.service /etc/systemd/system/
         systemctl daemon-reload
         systemctl enable aegis_pam_agent

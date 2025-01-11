@@ -11,5 +11,6 @@ struct PAMConfig {
         "password"   // Zmiana hasła
     };
     std::string log_path = "/var/log/aegis_pam.log";
-    std::string socket_path = "/var/run/aegis_pam.sock";
+    std::string socket_path = "/var/run/aegis/aegis_pam.sock";
+    std::string api_endpoint = "http://localhost:8443/api/v1/pam/record";
 }; 

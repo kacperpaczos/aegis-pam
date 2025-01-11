@@ -6,13 +6,24 @@ project('aegis-pam', 'cpp',
   ]
 )
 
-# Dependencies
-pam_dep = meson.get_compiler('cpp').find_library('pam')
+cpp = meson.get_compiler('cpp')
+
+# Zależności
+pam_dep = cpp.find_library('pam')
 thread_dep = dependency('threads')
 
-# Configuration data
+# Zależności POCO
+poco_deps = []
+poco_libs = ['PocoFoundation', 'PocoNet', 'PocoJSON']
+
+foreach lib : poco_libs
+    poco_deps += cpp.find_library(lib, required: true)
+endforeach
+
+# Konfiguracja
 conf_data = configuration_data()
 conf_data.set_quoted('VERSION', meson.project_version())
+conf_data.set_quoted('API_ENDPOINT', 'http://localhost:8443/api/v1/pam/record')
 if get_option('buildtype') == 'debug'
     conf_data.set('DEV_BUILD', true)
 else
@@ -28,7 +39,7 @@ configure_file(
 pam_module = shared_library('pam_aegis',
   'src/aegis_pam_module.cpp',
   name_prefix : '',
-  dependencies : [pam_dep],
+  dependencies : [pam_dep] + poco_deps,
   install : true,
   install_dir : '/lib/security'
 )
@@ -36,7 +47,7 @@ pam_module = shared_library('pam_aegis',
 # Agent
 aegis_pam_agent = executable('aegis_pam_agent',
   'src/aegis_pam_agent.cpp',
-  dependencies : [thread_dep],
+  dependencies : [thread_dep] + poco_deps,
   install : true,
   install_dir : '/usr/local/bin'
 )
