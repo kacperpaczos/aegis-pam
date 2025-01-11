@@ -43,7 +43,7 @@ echo "All components verified successfully!"
 
 # Po sprawdzeniu komponentów
 echo "Testing PAM integration..."
-if pamtester aegis $USER authenticate; then
+if pamtester -n aegis $USER authenticate; then
     echo "✓ PAM authentication test passed"
 else
     echo "✗ PAM authentication test failed"

@@ -1,5 +1,7 @@
 #include "version.hpp"
 #include "pam_config.hpp"
+#include "unix_socket.hpp"
+#include "http_client.hpp"
 #include <iostream>
 #include <thread>
 #include <syslog.h>
@@ -59,6 +61,7 @@ private:
     PAMConfig config;
     std::atomic<bool>& running;
     std::chrono::system_clock::time_point start_time;
+    std::unique_ptr<UnixSocket> socket;
 
 public:
     AegisAgent(const PAMConfig& cfg, std::atomic<bool>& run_flag) 
@@ -66,7 +69,13 @@ public:
           config(cfg),
           running(run_flag),
           start_time(std::chrono::system_clock::now()) {
-        logger.log("Agent started");
+        try {
+            socket = std::make_unique<UnixSocket>(config.socket_path, true);
+            logger.log("Agent started and socket initialized at " + config.socket_path);
+        } catch (const std::exception& e) {
+            logger.error("Failed to initialize socket: " + std::string(e.what()));
+            throw;
+        }
     }
 
     void process_events() {
@@ -90,11 +99,37 @@ public:
             cycle_count = 0;
         }
         
-        // Tu dodamy obsługę zdarzeń
+        try {
+            std::string message = socket->receive();
+            if (!message.empty()) {
+                logger.log("Received message: " + message);
+                handle_auth_message(message);
+            }
+        } catch (const std::exception& e) {
+            logger.error("Failed to process socket message: " + std::string(e.what()));
+        }
     }
 
     void log_error(const std::string& error) {
         logger.error(error);
+    }
+
+    void handle_auth_message(const std::string& message) {
+        size_t pos = message.find('|');
+        if (pos != std::string::npos) {
+            std::string event = message.substr(0, pos);
+            std::string username = message.substr(pos + 1);
+            
+            logger.log("Processing auth event: " + event + " for user: " + username);
+            
+            if (HttpClient::sendPamRecord(username, event)) {
+                logger.log("Successfully sent PAM record to API");
+            } else {
+                logger.error("Failed to send PAM record to API");
+            }
+        } else {
+            logger.error("Invalid message format received: " + message);
+        }
     }
 };
 
@@ -128,6 +163,8 @@ int main(int, char**) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             } catch (const std::exception& e) {
                 agent.log_error(e.what());
+                // W przypadku krytycznego błędu, próbujemy zrestartować agenta
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         }
 
