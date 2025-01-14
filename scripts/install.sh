@@ -143,6 +143,10 @@ esac
 mkdir -p /etc/aegis
 mkdir -p /var/run/aegis
 
+# Dodanie gniazda Unix
+sudo touch /var/run/aegis/aegis_pam.sock
+sudo chmod 777 /var/run/aegis/aegis_pam.sock
+
 # Konfiguracja i uruchomienie agenta (poza trybem dev)
 if [ "$INSTALL_MODE" != "dev" ]; then
     cp config/aegis_pam_agent.service /etc/systemd/system/
